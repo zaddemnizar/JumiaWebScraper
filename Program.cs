@@ -50,7 +50,7 @@ namespace JumiaWebScraper
                 var modele = doc.DocumentNode.SelectSingleNode("//*[text()=\"Modèle\"]//following-sibling::text()")?.InnerText.Substring(2);
                 var poids = doc.DocumentNode.SelectSingleNode("//*[text()=\"Poids (kg)\"]//following-sibling::text()")?.InnerText.Substring(2);
 
-                finalArticles.Add(string.Concat(nom, ",", prix, ",", sku, ",", couleur, ",", modele, ",", poids));
+                finalArticles.Add(string.Concat(nom, ";", prix, ";", sku, ";", couleur, ";", modele, ";", poids));
             }
 
             foreach (string article in finalArticles)
