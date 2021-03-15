@@ -57,42 +57,42 @@ namespace JumiaWebScraper
 
             for (int i = 0; i < /*hrefArticles.Count -*/10; i++)
             {
-                prog = i / 10;
-                Console.WriteLine($"{prog/10}");
+                Console.WriteLine($"Progress {i/10}%");
                 string articleLink = webUrl + hrefArticles[i];
                 doc = web.Load(articleLink);
-                foreach (var item in doc.DocumentNode.SelectNodes("//h1/@class"))
-                {
-                    nomArticles.Add(item.InnerText);
-                    break;
-                }
-                foreach (var item in doc.DocumentNode.SelectNodes("//span[@dir=\"ltr\"]"))
-                {
-                    prixArticles.Add(item.InnerText.Substring(0, item.InnerText.IndexOf(" ")));
-                    break;
-                }
-                foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[1]/text()"))
-                {
-                    skuArticles.Add(item.InnerText.Substring(2));
-                    break;
-                }
-                foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[2]/text()"))
-                {
-                    couleurArticles.Add(item.InnerText.Substring(2));
-                    break;
-                }
-                foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[3]/text()"))
-                {
-                    modelArticles.Add(item.InnerText.Substring(2));
-                    break;
-                }
-                foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[4]/text()"))
-                {
-                    poidsArticles.Add(item.InnerText.Substring(2));
-                    break;
-                }
 
-                finalArticles.Add(string.Concat(nomArticles[i],";",prixArticles[i], ";", skuArticles[i], ";", couleurArticles[i], ";", modelArticles[i], ";", poidsArticles[i]));
+                var nom = doc.DocumentNode.SelectSingleNode("//h1/@class")?.InnerText;
+                var prix = doc.DocumentNode.SelectSingleNode("//span[@dir=\"ltr\"]")?.InnerText;
+
+                //foreach (var item in doc.DocumentNode.SelectNodes("//span[@dir=\"ltr\"]"))
+                //{
+                //    prixarticles.add(item.innertext.substring(0, item.innertext.indexof(" ")));
+                //    break;
+                //}
+                //foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[1]/text()"))
+                //{
+                //    skuArticles.Add(item.InnerText.Substring(2));
+                //    break;
+                //}
+                //foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[2]/text()"))
+                //{
+                //    couleurArticles.Add(item.InnerText.Substring(2));
+                //    break;
+                //}
+                //foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[3]/text()"))
+                //{
+                //    modelArticles.Add(item.InnerText.Substring(2));
+                //    break;
+                //}
+                //foreach (var item in doc.DocumentNode.SelectNodes("//article[3]/div/ul/li[4]/text()"))
+                //{
+                //    poidsArticles.Add(item.InnerText.Substring(2));
+                //    break;
+                //}
+
+                //finalArticles.Add(string.Concat(nomArticles[i],";",prixArticles[i], ";", skuArticles[i], ";", couleurArticles[i], ";", modelArticles[i], ";", poidsArticles[i]));
+
+                finalArticles.Add(string.Concat(nom,";",prix));
             }
 
             foreach (string article in finalArticles)
