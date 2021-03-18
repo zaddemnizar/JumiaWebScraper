@@ -1,0 +1,41 @@
+var nbr = 34M;
+            var total = 200;
+            Console.WriteLine($@"{nbr / 200}%");
+
+            string url = "ddad";
+            int page = 1;
+            do
+            {
+                var doc = GetHtmlDocument($"{url}?page={page}");
+                page++;
+
+                //parse
+
+
+                var items = doc.DocumentNode.SelectNodes("//dsfs");
+                foreach (var item in items)
+                {
+                    var price = item.SelectSingleNode(".//path for price")?.InnerText;
+                }
+
+                if (doc.DocumentNode.SelectSingleNode("//kjashdaos").GetAttributeValue("href", null) == null)
+                    break;
+
+            } while (true);
+
+
+  HtmlDocument GetHtmlDocument(string url)
+        {
+            var doc = new HtmlDocument();
+            var html = "";
+            using (var wc = new WebClient())
+            {
+                html = wc.DownloadString(url);
+            }
+            doc.LoadHtml(html);
+            //var wc = new WebClient();
+            //html = wc.DownloadString(url);
+            //wc.Dispose();
+
+            return doc;
+        }
