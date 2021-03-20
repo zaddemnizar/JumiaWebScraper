@@ -1,0 +1,36 @@
+using System;
+using System.Windows.Forms;
+using System.Net;
+using HtmlAgilityPack;
+
+namespace JumiaWebScrapingWebClient
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            WebClient client = new WebClient();
+            string webCode = client.DownloadString("https://www.jumia.com.tn/son-informatique/");
+            txtWebCode.Text = webCode;
+            //var doc = GetHtmlDocument("https://www.jumia.com.tn/son-informatique/");
+            client.DownloadFile("https://tn.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/33/5273/1.jpg?8175", "imagedownloaded.jpg");
+        }
+
+        //HtmlAgilityPack.HtmlDocument GetHtmlDocument(string url)
+        //{
+        //    HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+        //    var html = "";
+        //    using (var wc = new WebClient())
+        //    {
+        //        html = wc.DownloadString(url);
+        //    }
+        //    doc.Load(html);
+        //    return doc;
+        //}
+    }
+}
