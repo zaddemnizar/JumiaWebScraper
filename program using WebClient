@@ -1,9 +1,14 @@
 using System;
-using System.Windows.Forms;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using HtmlAgilityPack;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace JumiaWebScrapingWebClient
+namespace JumiaScrapingForm
 {
     public partial class Form1 : Form
     {
@@ -12,25 +17,78 @@ namespace JumiaWebScrapingWebClient
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             WebClient client = new WebClient();
-            string webCode = client.DownloadString("https://www.jumia.com.tn/son-informatique/");
-            txtWebCode.Text = webCode;
-            //var doc = GetHtmlDocument("https://www.jumia.com.tn/son-informatique/");
-            client.DownloadFile("https://tn.jumia.is/unsafe/fit-in/300x300/filters:fill(white)/product/33/5273/1.jpg?8175", "imagedownloaded.jpg");
-        }
+            string webUrl = "https://www.jumia.com.tn";
+            string webCode = client.DownloadString(webUrl+textUrl.Text);
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(webCode);
 
-        //HtmlAgilityPack.HtmlDocument GetHtmlDocument(string url)
-        //{
-        //    HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-        //    var html = "";
-        //    using (var wc = new WebClient())
-        //    {
-        //        html = wc.DownloadString(url);
-        //    }
-        //    doc.Load(html);
-        //    return doc;
-        //}
+            //extract href articles 1 ere page
+            List<string> hrefArticles = new List<string>();
+            foreach (var item in doc.DocumentNode.SelectNodes("//*[@class=\"core\"]/@href"))
+                hrefArticles.Add(item.Attributes["href"].Value);
+
+            //nombre de pages à parcourir
+            var nbArticlesText = doc.DocumentNode.SelectSingleNode("//p [@class=\"-gy5 -phs\"]");
+            int nbArticles = Int32.Parse(nbArticlesText.InnerText.Substring(0, nbArticlesText.InnerText.IndexOf(" ")));
+            int nbPages = (int)(((nbArticles / 40) > 50) ? 50 : Math.Round(Convert.ToDecimal(nbArticles / 40)) + 1);
+
+            for (int i = 0; i < nbPages - 1; i++)
+            {
+                textStatut.Text = $"charging page {i + 2}/ {nbPages}";
+                string link = client.DownloadString(webUrl + doc.DocumentNode.SelectSingleNode("//a[@aria-label=\"Page suivante\"]").Attributes["href"].Value);
+                doc.LoadHtml(link);
+                foreach (var item in doc.DocumentNode.SelectNodes("//*[@class=\"core\"]/@href"))
+                {
+                    hrefArticles.Add(item.Attributes["href"].Value);
+                }
+            }
+
+            //Parcourir tous les articles
+            List<string> finalArticles = new List<string> { "Nom;Prix;SKU;Couleur;Model;Poids" };
+            int progressbefore = 0;
+            for (int i = 0; i < hrefArticles.Count - 1; i++)
+            {
+                //progressbar
+                int progress = (int)((Convert.ToDecimal(i) / hrefArticles.Count)* 100);
+                if (i == hrefArticles.Count - 2)
+                    progressBar.Value = 100;
+                else progressBar.Increment(progress-progressbefore);
+                progressbefore = progress;
+
+                string articleLink = client.DownloadString(webUrl + hrefArticles[i]);
+                doc.LoadHtml(articleLink);
+
+                var nom = doc.DocumentNode.SelectSingleNode("//h1/@class")?.InnerText;
+                var prix = doc.DocumentNode.SelectSingleNode("//span[@dir=\"ltr\"]")?.InnerText.Replace("&amp;", "&");
+                var sku = doc.DocumentNode.SelectSingleNode("//*[text()=\"SKU\"]//following-sibling::text()")?.InnerText.Substring(2);
+                var couleur = doc.DocumentNode.SelectSingleNode("//*[text()=\"Couleur\"]//following-sibling::text()")?.InnerText.Substring(2).Replace("&amp;", "&");
+                var modele = doc.DocumentNode.SelectSingleNode("//*[text()=\"Modèle\"]//following-sibling::text()")?.InnerText.Substring(2);
+                var poids = doc.DocumentNode.SelectSingleNode("//*[text()=\"Poids (kg)\"]//following-sibling::text()")?.InnerText.Substring(2);
+
+                //télécharger image correspondante
+                string imageurl = doc.DocumentNode.SelectSingleNode("//img[@class=\"-fw -fh\"]").Attributes["data-src"].Value;
+                client.DownloadFile(imageurl, sku + ".jpg");
+
+                finalArticles.Add(string.Concat(nom, ";", prix, ";", sku, ";", couleur, ";", modele, ";", poids));
+            }
+
+            foreach (string article in finalArticles)
+                Console.WriteLine(article);
+
+            Console.WriteLine(hrefArticles.Count + "  articles");
+
+            //creation fichier csv
+            StringBuilder sb = new StringBuilder();
+            foreach (var article in finalArticles)
+            {
+                sb.AppendLine(article);
+            }
+            File.WriteAllText(@"C:\Mon Travail\Articles.csv", sb.ToString());
+
+            textStatut.Text = "Download complete successfully!!!";
+        }
     }
 }
