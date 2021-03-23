@@ -75,11 +75,6 @@ namespace JumiaScrapingForm
                 finalArticles.Add(string.Concat(nom, ";", prix, ";", sku, ";", couleur, ";", modele, ";", poids));
             }
 
-            foreach (string article in finalArticles)
-                Console.WriteLine(article);
-
-            Console.WriteLine(hrefArticles.Count + "  articles");
-
             //creation fichier csv
             StringBuilder sb = new StringBuilder();
             foreach (var article in finalArticles)
